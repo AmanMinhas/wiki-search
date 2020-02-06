@@ -1,7 +1,7 @@
 # wiki-search
 Search Wikipedia
 
-git clone git@github.com:AmanMinhas/wiki-search.git
+`git clone git@github.com:AmanMinhas/wiki-search.git`
 
 Open index.html in browser
 
