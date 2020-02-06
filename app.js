@@ -1,3 +1,5 @@
+'use strict';
+
 (function() {
   /**
     Happy Path Steps :-
@@ -10,13 +12,21 @@
 
   const formEl = document.querySelector('#search-form');
   const errorEl = document.querySelector('#search-error');
+  const dropdownEl = document.querySelector('#search-language');
+  const tocEl = document.querySelector('#toc');
   formEl.addEventListener('submit', function(e) {
-      e.preventDefault();
-      handleSearchSubmit();
+    e.preventDefault();
+    handleSearchSubmit();
   });
 
+  dropdownEl.addEventListener('change', function(e) {
+    e.preventDefault();
+    handleSearchSubmit();
+  })
+
   function getFormValues() {
-    const title = document.querySelector('#article-title').value;
+    let title = document.querySelector('#article-title').value;
+    title = title.replace(/ /g,"_");
     const language = document.querySelector('#search-language').value;
 
     return { title, language };
@@ -58,7 +68,8 @@
         'Api-User-Agent': 'amandeepSinghMinhas@gmail.com'
       });
 
-      const response = await fetch(path, {
+      const uri = encodeURI(path);
+      const response = await fetch(uri, {
         method: 'GET',
         headers
       });
@@ -91,6 +102,7 @@
 
   async function handleSearchSubmit() {
     resetError();
+    resetToc();
     if (!validateForm()) {
       return;
     }
@@ -126,6 +138,10 @@
     }
   }
 
+  function resetToc() {
+    if (tocEl) tocEl.innerHTML = '';
+  }
+
   function renderToc(entries, wikiPage) {
     if (!Array.isArray(entries)) return;
 
@@ -156,7 +172,8 @@
         .join('');
     }
 
-    const node = document.querySelector('#toc');
-    node.innerHTML = `<ul>${getContent('', 1)}</ul>`;
+    if (tocEl) {
+      tocEl.innerHTML = `<ul>${getContent('', 1)}</ul>`;
+    }
   }
 })();
