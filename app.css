@@ -1,0 +1,23 @@
+body {
+  color: #54595d;
+}
+
+.form-field {
+  margin: 10px 0;
+}
+
+.form-field label {
+  display: block;
+}
+
+#container {
+  padding: 10px;
+}
+
+#search-form button {
+  background: #007bff;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 4px 24px;
+}
