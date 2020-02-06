@@ -9,6 +9,7 @@
   */
 
   const formEl = document.querySelector('#search-form');
+  const errorEl = document.querySelector('#search-error');
   formEl.addEventListener('submit', function(e) {
       e.preventDefault();
       handleSearchSubmit();
@@ -20,6 +21,31 @@
 
     return { title, language };
   }
+
+  function validateForm() {
+    const { title, language } = getFormValues();
+    if (!title || !language) {
+      return false;
+    }
+    return true;
+  }
+
+  function resetError() {
+    if (errorEl) {
+      errorEl.classList.add('hidden');
+    }
+  }
+
+  function renderError(error) {
+    if (error && errorEl) {
+      errorEl.classList.remove('hidden');
+      errorEl.innerHTML = `<p>${error}</p>`;
+    }
+  }
+
+  function isMobileDevice() {
+    return (typeof window.orientation !== 'undefined') || (navigator.userAgent.indexOf('IEMobile') !== -1);
+  };
 
   async function getRequest(path) {
     try {
@@ -45,6 +71,7 @@
     } catch (err) {
       // handle error
       console.warn({ err });
+      renderError(err.message);
       return false;
     }
   }
@@ -63,7 +90,10 @@
   }
 
   async function handleSearchSubmit() {
-    // TODO
+    resetError();
+    if (!validateForm()) {
+      return;
+    }
     const { title, language } = getFormValues();
 
     // Get Page Summary
@@ -71,10 +101,62 @@
     console.log({ pageSummary });
     if (!pageSummary) return;
 
+    // Apply Direction
+    const layoutDirection = pageSummary.dir;
+    applyDirection(layoutDirection);
+
     // Fetch Metadata
     const metadataApiPath = pageSummary.api_urls.metadata;
     const pageMetadata = await getPageMetadata(metadataApiPath);
     console.log({ pageMetadata });
     if (!pageMetadata) return;
+
+    // Render Table Of Content
+    const device = isMobileDevice() ? 'mobile' : 'desktop';
+    console.log({device});
+    const wikiPage = pageSummary.content_urls[device].page;
+    renderToc(pageMetadata.toc.entries, wikiPage);
+  }
+
+  function applyDirection(layoutDirection) {
+    const dir = layoutDirection === 'rtl' ? layoutDirection : 'ltr';
+    const contailerEl = document.querySelector('#container');
+    if (contailerEl) {
+      contailerEl.className = `direction-${dir}`;
+    }
+  }
+
+  function renderToc(entries, wikiPage) {
+    if (!Array.isArray(entries)) return;
+
+    function getContent(parentNumber, level) {
+      return entries
+        .filter((item) => item.level === level && item.number.startsWith(parentNumber) && item.number !== parentNumber)
+        .map((node) => {
+          const subMenuExists = entries.some((item) => {
+            return item.level > node.level && item.number.startsWith(node.number) && item.number !== node.number;
+          });
+
+          const subMenu = subMenuExists ? `
+            <ul>
+              ${getContent(node.number, node.level + 1)}
+            </ul>
+          ` : '';
+
+          return `
+            <li>
+              <a target='_blank' href='${wikiPage}#${node.anchor}'>
+                <span>${node.number}</span>
+                ${node.html}
+              </a>
+              ${subMenu}
+            </li>
+          `
+        })
+        .join('');
+    }
+
+    const node = document.querySelector('#toc');
+    node.innerHTML = `<ul>${getContent('', 1)}</ul>`;
   }
 })();

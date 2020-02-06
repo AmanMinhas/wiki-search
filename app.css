@@ -2,6 +2,26 @@ body {
   color: #54595d;
 }
 
+#container {
+  padding: 10px;
+}
+
+.direction-ltr {
+  direction: ltr;
+}
+
+.direction-rtl {
+  direction: rtl;
+}
+
+#search-error p {
+  color: red;
+}
+
+.hidden {
+  display: none;
+}
+
 .form-field {
   margin: 10px 0;
 }
@@ -20,4 +40,21 @@ body {
   color: white;
   cursor: pointer;
   padding: 4px 24px;
+}
+
+#toc ul:first-child {
+  padding: 0;
+}
+
+#toc ul {
+  list-style: none;
+}
+
+#toc ul li a {
+  text-decoration: none;
+  color: #54595d;
+}
+
+#toc ul li a:hover {
+  text-decoration: underline;
 }
